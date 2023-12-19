@@ -1,0 +1,11 @@
+{
+	"id": "string-manipulator",
+	"name": "String Manipulator",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Handy conversions of strings",
+	"author": "Dimitris Vogiatzis",
+	"authorUrl": "https://obsidian.md",
+	"fundingUrl": "https://obsidian.md/pricing",
+	"isDesktopOnly": true
+}
