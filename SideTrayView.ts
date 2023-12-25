@@ -1,3 +1,4 @@
+import { log } from "console";
 import {
 	ItemView,
 	MarkdownRenderer,
@@ -5,9 +6,9 @@ import {
 	WorkspaceLeaf,
 	moment,
 } from "obsidian";
-import { getDailyNote } from "obsidian-daily-notes-interface";
+import { getAllWeeklyNotes, getDailyNote, getDateUID } from "obsidian-daily-notes-interface";
 import { get } from "svelte/store";
-import { dailyNotes } from "ui/stores";
+import { dailyNotesStore } from "ui/stores";
 
 
 export const VIEW_TYPE = "super-scratchpad";
@@ -15,14 +16,22 @@ let timer: NodeJS.Timeout | null = null;
 
 export class SideTrayView extends ItemView {
 
+	private today;
+
+	private baseContainer: HTMLElement;
+
 	constructor(leaf: WorkspaceLeaf) {
 		super(leaf);
+		console.log("After super");
+		
 		this.onFileModified = this.onFileModified.bind(this);
 		this.registerEvent(this.app.vault.on("modify", this.onFileModified));
-
-		this.registerDomEvent(window, "keydown", () => {
-			console.log("asd");
-		})
+		this.today = moment();
+		this.baseContainer = document.createElement('div');
+		this.baseContainer.id = "super-scratchpad"
+		this.containerEl.empty();
+		this.containerEl.appendChild(this.baseContainer)	
+		console.log("Called constructor");
 	}
 
 	getViewType() {
@@ -33,56 +42,59 @@ export class SideTrayView extends ItemView {
 		return "Super Scratchpad";
 	}
 
+	private timer: NodeJS.Timeout | null = null; // Define timer at class level
+
 	private async onFileModified(file: TFile): Promise<void> {
 
 		if (file.parent?.path != "Journal") return;
 
-		if (timer) {
-			clearTimeout(timer);
-			timer = null;
+		if (this.timer) {
+			clearTimeout(this.timer); // Clear the existing timer if it's set
+			this.timer = null;
 		}
 
-		timer = setTimeout(() => {
+		this.timer = setTimeout(() => {
 			console.log("Performing operations after delay...");
-		}, 200);
-		// console.log(`Modified file : ${file}`);
-		// console.log(file);
+			// Place operations that you want to perform after the delay here
+		}, 1000);
 
-
-
-		if (this.containerEl) this.containerEl.empty();
-
-		dailyNotes.reindex();
-		const allDailyNotes = get(dailyNotes);
-		const today = moment();
-		const todayNote = getDailyNote(today, allDailyNotes);
-		const compactedData = await this.app.vault.adapter.read(todayNote.path);
-
-		MarkdownRenderer.render(
-			this.app,
-			compactedData,
-			this.containerEl,
-			todayNote.path,
-			this
-		);
+		this.renderAllData();
 	}
 
 	async onOpen(): Promise<void> {
-		console.log(this);
+		this.renderAllData();
+	}
 
-		dailyNotes.reindex();
+	async renderAllData() {
+		dailyNotesStore.reindex();
+		const allNotes: Record<string, TFile> = get(dailyNotesStore);
+		const todayNote: TFile = getDailyNote(this.today, allNotes);
+		const allMoments = Object.keys(allNotes).map(k => k.replace(/^day-/i, '')).map(v => moment(v));
 
-		const allDailyNotes = get(dailyNotes);
-		const today = moment();
-		const todayNote = getDailyNote(today, allDailyNotes);
-		const compactedData = await this.app.vault.adapter.read(todayNote.path);
+		console.log(allNotes);
 
-		this.containerEl.empty();
+		var trayData: string[] = [];
+		for (const thatMoment of allMoments) {
+			const thatDatesNote = getDailyNote(thatMoment, allNotes);
+			const thatDatesData = await this.app.vault.adapter.read(thatDatesNote.path);
+			trayData.push(`# ${thatMoment.format("DD.MM.YYYY")}[Go](${thatMoment.format("DD.MM.YYYY")})\n`)
+			trayData.push(thatDatesData + '\n');
+		}
+
+		const pairs: string[] = [];
+		for (let i = 0; i < trayData.length; i += 2) {
+			const pair = trayData.slice(i, i + 2).join('\n');
+			pairs.push(pair);
+		}
+
+		const result = pairs.join('\n---\n');
+
+		this.baseContainer.empty();
 
 		MarkdownRenderer.render(
 			this.app,
-			compactedData,
-			this.containerEl,
+			result,
+			this.baseContainer,
 			todayNote.path,
 			this
 		);

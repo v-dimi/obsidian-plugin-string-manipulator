@@ -1,7 +1,7 @@
 import { writable } from "@dishuostec/svelte-store";
 import { getAllDailyNotes } from "obsidian-daily-notes-interface";
 
-export const dailyNotes = createDailyNotesStore();
+export const dailyNotesStore = createDailyNotesStore();
 
 function createDailyNotesStore() {
     let hasError = false;

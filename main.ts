@@ -48,7 +48,16 @@ export default class MyPlugin extends Plugin {
 
 		await this.loadSettings();
 
-		this.registerView(VIEW_TYPE, (leaf) => new SideTrayView(leaf));
+		console.log("Loading");
+
+		this.registerView(VIEW_TYPE, (leaf) => {
+			console.log("Registering");
+			
+			return new SideTrayView(leaf);
+		});
+
+		console.log("Loaded");
+
 
 		this.addRibbonIcon("dice", "Activate view", () => {
 			this.activateView();
@@ -119,7 +128,7 @@ export default class MyPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "ascii-to-hey",
+			id: "ascii-to-hex",
 			name: "Ascii To Hex",
 			editorCallback(editor) {
 				editorSelectionWrapper(editor, asciiToHex);
@@ -162,7 +171,7 @@ export default class MyPlugin extends Plugin {
 		);
 	}
 
-	onunload() {}
+	onunload() { }
 
 	async activateView() {
 		const { workspace } = this.app;
