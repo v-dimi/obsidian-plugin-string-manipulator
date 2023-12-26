@@ -38,21 +38,22 @@ export class SideTrayView extends ItemView {
 		return "Super Scratchpad";
 	}
 
+	getIcon(): string {
+		return "beer"
+	}
+
 	private async onFileModified(file: TFile): Promise<void> {
 
 		if (file.parent?.path != "Journal") return;
 
-		if (this.timer) {
-			clearTimeout(this.timer); // Clear the existing timer if it's set
-			this.timer = null;
+		var lastClick = 0;
+		var delay = 200;
+
+		function myFunction() {
+			if (lastClick >= (Date.now() - delay)) return;
+			lastClick = Date.now();
+			this.mergeAllDailyNotesAndDisplay()
 		}
-
-		this.timer = setTimeout(() => {
-			console.log("Performing operations after delay...");
-			// Place operations that you want to perform after the delay here
-		}, 1000);
-
-		this.mergeAllDailyNotesAndDisplay();
 	}
 
 	async onOpen(): Promise<void> {

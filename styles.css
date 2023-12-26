@@ -9,4 +9,5 @@ If your plugin does not need CSS, delete this file.
 
 #super-scratchpad {
     overflow: scroll;
+    padding: 10px;
 }
