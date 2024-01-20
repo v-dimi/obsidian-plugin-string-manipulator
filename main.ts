@@ -8,6 +8,7 @@ import {
 	PluginSettingTab,
 	Setting,
 	WorkspaceLeaf,
+	normalizePath,
 } from "obsidian";
 import { base64Encode } from "scripts/base64Encode";
 import { base64Decode } from "scripts/base64Decode";
@@ -58,6 +59,18 @@ export default class MyPlugin extends Plugin {
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new SampleSettingTab(this.app, this));
+	}
+
+	private addNavigationCommands() {
+		this.addCommand({
+			id: "open-todos",
+			name: "Open Todo File",
+			editorCallback(editor) {
+				const leaf = this.app.workspace.getRightLeaf();
+				const path = normalizePath("ToDo.md");
+				const file = this.app.workspace.getAbstractFileByPath(path);
+			},
+		});
 	}
 
 	private addStringManipulatorCommands() {

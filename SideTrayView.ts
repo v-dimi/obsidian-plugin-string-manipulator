@@ -44,16 +44,14 @@ export class SideTrayView extends ItemView {
 
 	private async onFileModified(file: TFile): Promise<void> {
 
-		if (file.parent?.path != "Journal") return;
+		if (file.parent?.name != "Journal") return;
 
 		var lastClick = 0;
 		var delay = 200;
 
-		function myFunction() {
-			if (lastClick >= (Date.now() - delay)) return;
-			lastClick = Date.now();
-			this.mergeAllDailyNotesAndDisplay()
-		}
+		if (lastClick >= (Date.now() - delay)) return;
+		lastClick = Date.now();
+		this.mergeAllDailyNotesAndDisplay()
 	}
 
 	async onOpen(): Promise<void> {
@@ -73,7 +71,14 @@ export class SideTrayView extends ItemView {
 	private async mergeAllDailyNotes() {
 		dailyNotesStore.reindex();
 		const allNotes: Record<string, TFile> = get(dailyNotesStore);
-		const allMoments: moment.Moment[] = Object.keys(allNotes).map(k => k.replace(/^day-/i, '')).map(v => moment(v));
+		const allMoments: moment.Moment[] = Object
+			.keys(allNotes)
+			.map(k => k.replace(/^day-/i, ''))
+			.map(v => moment(v))
+			.sort()
+			;
+		// Sorting the array of moment objects
+		allMoments.sort((a, b) => b.diff(a));
 
 		var headingsAndNotesForEachDay: string[] = [];
 		for (const thatMoment of allMoments) {
@@ -110,7 +115,7 @@ export class SideTrayView extends ItemView {
 	private getTFileForClickedNote(event: MouseEvent): TFile | null {
 		const element = event.target as HTMLAnchorElement;
 		const noteName: string | null = element.getAttribute('href');
-		const path = 'Journal/' + noteName + '.md';
+		const path = 'confluent-notes/Journal/' + noteName + '.md';
 		return this.app.vault.getAbstractFileByPath(path) as TFile | null;
 	}
 
