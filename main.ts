@@ -3,7 +3,6 @@ import {
 	Editor,
 	MarkdownView,
 	Modal,
-	Notice,
 	Plugin,
 	PluginSettingTab,
 	Setting,
@@ -20,6 +19,7 @@ import { toLowerCase } from "scripts/lowerCase";
 import { hexToAscii } from "scripts/hexToAscii";
 import { asciiToHex } from "scripts/asciiToHex";
 import { SideTrayView, VIEW_TYPE } from "SideTrayView";
+import { toTitleCase } from "scripts/titleCase";
 
 // ! Remember to rename these classes and interfaces!
 
@@ -83,8 +83,16 @@ export default class MyPlugin extends Plugin {
 		});
 
 		this.addCommand({
+			id: "to-titlecase",
+			name: "To Title Case",
+			editorCallback(editor) {
+				editorSelectionWrapper(editor, toTitleCase);
+			},
+		});		
+
+		this.addCommand({
 			id: "to-lowercase",
-			name: "To Lowercase",
+			name: "To Lower Case",
 			editorCallback(editor) {
 				editorSelectionWrapper(editor, toLowerCase);
 			},

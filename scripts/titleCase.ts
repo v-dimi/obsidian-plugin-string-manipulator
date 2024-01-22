@@ -1,5 +1,5 @@
 const _ = require("lodash");
 
-export function toHigherCase(word : string): string {
+export function toTitleCase(word : string): string {
     return _.startCase(_.camelCase(word));
 }
